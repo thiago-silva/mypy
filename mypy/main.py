@@ -181,6 +181,9 @@ def process_options(args: List[str]) -> Tuple[List[BuildSource], Options]:
                         help="dump type inference stats")
     parser.add_argument('--custom-typing', metavar='MODULE', dest='custom_typing_module',
                         help="use a custom typing module")
+    parser.add_argument('--find-occurrences', metavar='CLASS.MEMBER',
+                        dest='special-opts:find_occurrences',
+                        help="print out all usages of a class member (experimental)")
     # deprecated options
     parser.add_argument('--silent', action='store_true', dest='special-opts:silent',
                         help=argparse.SUPPRESS)
@@ -258,6 +261,12 @@ def process_options(args: List[str]) -> Tuple[List[BuildSource], Options]:
     # Set build flags.
     if special_opts.strict_optional:
         experiments.STRICT_OPTIONAL = True
+    if special_opts.find_occurrences:
+        experiments.find_occurrences = special_opts.find_occurrences.split('.')
+        if len(experiments.find_occurrences) < 2:
+            parser.error("Can only find occurrences of class members.")
+        if len(experiments.find_occurrences) != 2:
+            parser.error("Can only find occurrences of non-nested class members.")
 
     # Set reports.
     for flag, val in vars(special_opts).items():
